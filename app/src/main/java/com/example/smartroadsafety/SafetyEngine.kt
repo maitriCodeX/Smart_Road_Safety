@@ -95,13 +95,18 @@ object SafetyEngine {
 
         registerSmsReceivers(app)
         startInternalServer()
+        startAutoSendTimer()
         startLocationTracking(app)
     }
 
     fun getEmergencyTargetPhone(): String {
         val prefs = appContext?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs?.getString(KEY_RELATIVE_PHONE, DEFAULT_EMERGENCY_PHONE)?.ifBlank { DEFAULT_EMERGENCY_PHONE }
-            ?: DEFAULT_EMERGENCY_PHONE
+        val saved = prefs?.getString(KEY_RELATIVE_PHONE, DEFAULT_EMERGENCY_PHONE)?.trim()
+        return if (saved.isNullOrBlank() || saved.contains("91234") || saved.contains("1234567890") || saved.contains("56789")) {
+            DEFAULT_EMERGENCY_PHONE
+        } else {
+            saved
+        }
     }
 
     fun setEmergencyTargetPhone(phone: String) {
@@ -117,7 +122,7 @@ object SafetyEngine {
     fun getActiveTunnelName(): String {
         val prefs = appContext?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val saved = prefs?.getString(KEY_TUNNEL_NAME, DEFAULT_TUNNEL_NAME)
-        return if (saved.isNullOrBlank() || saved.contains("curvy-frog") || saved.contains("purple-chicken") || saved.contains("loose-baths") || saved.contains("cold-spiders") || saved.contains("light-jellyfish")) {
+        return if (saved.isNullOrBlank() || saved.contains("curvy-frog") || saved.contains("purple-chicken") || saved.contains("loose-baths") || saved.contains("cold-spiders") || saved.contains("light-jellyfish") || saved.contains("hungry-eels") || saved.contains("neat-doodles") || saved.contains("curvy-hound")) {
             DEFAULT_TUNNEL_NAME
         } else {
             saved
@@ -613,87 +618,149 @@ object SafetyEngine {
             return
         }
 
-        try {
-            val smsManager = getSmsManager(ctx)
-            val parts = smsManager.divideMessage(message)
-            Log.i(TAG, "🚀 Dispatching SMS to $phoneNumber (${parts.size} part(s)): \"$message\"")
+        val digits = phoneNumber.filter { it.isDigit() }
+        val targetPhone = if (digits.contains("91234") || digits.contains("1234567890") || digits.isEmpty()) {
+            getEmergencyTargetPhone()
+        } else if (digits.length == 10 && !phoneNumber.startsWith("+")) {
+            "+91$digits"
+        } else {
+            phoneNumber
+        }
 
+        try {
+            val managers = getAllSmsManagers(ctx)
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
 
-            if (parts.size > 1) {
-                val sentIntents = ArrayList<PendingIntent>()
-                val deliveredIntents = ArrayList<PendingIntent>()
-                for (i in parts.indices) {
-                    sentIntents.add(PendingIntent.getBroadcast(ctx, 1000 + i, Intent(SMS_SENT_ACTION).setPackage(ctx.packageName), flags))
-                    deliveredIntents.add(PendingIntent.getBroadcast(ctx, 2000 + i, Intent(SMS_DELIVERED_ACTION).setPackage(ctx.packageName), flags))
+            for ((simName, smsManager) in managers) {
+                try {
+                    val parts = smsManager.divideMessage(message)
+                    Log.i(TAG, "🚀 Dispatching SMS via $simName to $targetPhone (${parts.size} part(s)): \"$message\"")
+
+                    if (parts.size > 1) {
+                        val sentIntents = ArrayList<PendingIntent>()
+                        val deliveredIntents = ArrayList<PendingIntent>()
+                        val baseCode = 1000 + Math.abs(simName.hashCode() % 1000)
+                        for (i in parts.indices) {
+                            sentIntents.add(PendingIntent.getBroadcast(
+                                ctx, baseCode + i,
+                                Intent(SMS_SENT_ACTION).apply {
+                                    setPackage(ctx.packageName)
+                                    putExtra("sim_name", simName)
+                                    putExtra("part", i)
+                                },
+                                flags
+                            ))
+                            deliveredIntents.add(PendingIntent.getBroadcast(
+                                ctx, baseCode + 100 + i,
+                                Intent(SMS_DELIVERED_ACTION).apply {
+                                    setPackage(ctx.packageName)
+                                    putExtra("sim_name", simName)
+                                    putExtra("part", i)
+                                },
+                                flags
+                            ))
+                        }
+                        smsManager.sendMultipartTextMessage(targetPhone, null, parts, sentIntents, deliveredIntents)
+                    } else {
+                        val baseCode = 1000 + Math.abs(simName.hashCode() % 1000)
+                        val sentIntent = PendingIntent.getBroadcast(
+                            ctx, baseCode,
+                            Intent(SMS_SENT_ACTION).apply {
+                                setPackage(ctx.packageName)
+                                putExtra("sim_name", simName)
+                            },
+                            flags
+                        )
+                        val deliveredIntent = PendingIntent.getBroadcast(
+                            ctx, baseCode + 100,
+                            Intent(SMS_DELIVERED_ACTION).apply {
+                                setPackage(ctx.packageName)
+                                putExtra("sim_name", simName)
+                            },
+                            flags
+                        )
+                        smsManager.sendTextMessage(targetPhone, null, message, sentIntent, deliveredIntent)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ SMS Transmission Exception on $simName: ${e.message}")
                 }
-                smsManager.sendMultipartTextMessage(phoneNumber, null, parts, sentIntents, deliveredIntents)
-            } else {
-                val sentIntent = PendingIntent.getBroadcast(ctx, 1000, Intent(SMS_SENT_ACTION).setPackage(ctx.packageName), flags)
-                val deliveredIntent = PendingIntent.getBroadcast(ctx, 2000, Intent(SMS_DELIVERED_ACTION).setPackage(ctx.packageName), flags)
-                smsManager.sendTextMessage(phoneNumber, null, message, sentIntent, deliveredIntent)
             }
         } catch (e: Exception) {
             Log.e(TAG, "❌ SMS Transmission Exception: ${e.message}")
         }
     }
 
-    private fun getSmsManager(ctx: Context): SmsManager {
+    private fun getAllSmsManagers(ctx: Context): List<Pair<String, SmsManager>> {
+        val list = mutableListOf<Pair<String, SmsManager>>()
         try {
-            val defaultSubId = SmsManager.getDefaultSmsSubscriptionId()
-            if (defaultSubId != -1 && defaultSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    return ctx.getSystemService(SmsManager::class.java).createForSubscriptionId(defaultSubId)
-                } else {
-                    @Suppress("DEPRECATION")
-                    return SmsManager.getSmsManagerForSubscriptionId(defaultSubId)
-                }
-            }
-
             if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                 val subManager = ctx.getSystemService(SubscriptionManager::class.java)
                 val activeSubs = subManager?.activeSubscriptionInfoList
                 if (!activeSubs.isNullOrEmpty()) {
-                    val activeSim = activeSubs[0]
-                    Log.i(TAG, "📱 Auto-selected SIM 1: ${activeSim.displayName} (SubId: ${activeSim.subscriptionId})")
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        return ctx.getSystemService(SmsManager::class.java).createForSubscriptionId(activeSim.subscriptionId)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        return SmsManager.getSmsManagerForSubscriptionId(activeSim.subscriptionId)
+                    for (sim in activeSubs) {
+                        val name = sim.carrierName?.toString()?.ifBlank { sim.displayName?.toString() } ?: "SIM ${sim.simSlotIndex + 1}"
+                        val label = "SIM ${sim.simSlotIndex + 1} ($name, SubId: ${sim.subscriptionId})"
+                        val sm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            ctx.getSystemService(SmsManager::class.java).createForSubscriptionId(sim.subscriptionId)
+                        } else {
+                            @Suppress("DEPRECATION")
+                            SmsManager.getSmsManagerForSubscriptionId(sim.subscriptionId)
+                        }
+                        list.add(Pair(label, sm))
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Multi-SIM resolver note: ${e.message}")
+            Log.w(TAG, "Multi-SIM query note: ${e.message}")
         }
 
-        @Suppress("DEPRECATION")
-        return SmsManager.getDefault()
+        if (list.isEmpty()) {
+            try {
+                val defaultSubId = SmsManager.getDefaultSmsSubscriptionId()
+                if (defaultSubId != -1 && defaultSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+                    val sm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        ctx.getSystemService(SmsManager::class.java).createForSubscriptionId(defaultSubId)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        SmsManager.getSmsManagerForSubscriptionId(defaultSubId)
+                    }
+                    list.add(Pair("DefaultSub ($defaultSubId)", sm))
+                }
+            } catch (_: Exception) {}
+
+            if (list.isEmpty()) {
+                @Suppress("DEPRECATION")
+                list.add(Pair("DefaultSmsManager", SmsManager.getDefault()))
+            }
+        }
+        return list
     }
 
     private fun registerSmsReceivers(ctx: Context) {
         val sentReceiver = object : BroadcastReceiver() {
             override fun onReceive(c: Context?, intent: Intent?) {
+                val simName = intent?.getStringExtra("sim_name") ?: "Carrier"
+                val errorCode = intent?.getIntExtra("errorCode", -1) ?: -1
                 when (resultCode) {
                     Activity.RESULT_OK -> {
                         sentSmsCount++
-                        Log.i(TAG, "✅ CARRIER CONFIRMED: SMS successfully dispatched to cellular network! (Total: $sentSmsCount)")
+                        Log.i(TAG, "✅ CARRIER CONFIRMED ($simName): SMS successfully dispatched to cellular network! (Total: $sentSmsCount)")
                     }
-                    else -> Log.w(TAG, "❌ Carrier Error Code: $resultCode")
+                    else -> Log.w(TAG, "❌ Carrier Error Code: $resultCode on $simName (Modem error code: $errorCode)")
                 }
             }
         }
 
         val deliveredReceiver = object : BroadcastReceiver() {
             override fun onReceive(c: Context?, intent: Intent?) {
+                val simName = intent?.getStringExtra("sim_name") ?: "Carrier"
                 when (resultCode) {
-                    Activity.RESULT_OK -> Log.i(TAG, "📬 CARRIER CONFIRMED: SMS delivered to recipient handset!")
-                    else -> Log.w(TAG, "⚠️ Delivery receipt: $resultCode")
+                    Activity.RESULT_OK -> Log.i(TAG, "📬 CARRIER CONFIRMED ($simName): SMS delivered to recipient handset!")
+                    else -> Log.w(TAG, "⚠️ Delivery receipt on $simName: $resultCode")
                 }
             }
         }
