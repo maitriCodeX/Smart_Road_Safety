@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.smartroadsafety.data.DataRepository
 import com.example.smartroadsafety.model.BlackspotZone
+import com.example.smartroadsafety.model.HeatmapOverview
+import kotlinx.coroutines.launch
 
 class HeatmapFragment : Fragment() {
 
@@ -19,6 +22,8 @@ class HeatmapFragment : Fragment() {
     private lateinit var spotVaishno: View
     private lateinit var spotChhatral: View
     private lateinit var spotSanand: View
+
+    private var activeBlackspots: List<BlackspotZone> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +50,18 @@ class HeatmapFragment : Fragment() {
     }
 
     private fun loadHeatmapData() {
-        val overview = DataRepository.getHeatmapOverview()
+        val initialOverview = DataRepository.getHeatmapOverview()
+        renderHeatmap(initialOverview)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val overview = DataRepository.fetchHeatmapOverviewOnline()
+            renderHeatmap(overview)
+        }
+    }
+
+    private fun renderHeatmap(overview: HeatmapOverview) {
+        if (!isAdded || context == null) return
+        activeBlackspots = overview.blackspots
         tvHeatmapIncidentCount.text = "${overview.totalIncidents} Gaussian Mesh Incidents • Gujarat Region"
 
         val defaultZone = overview.blackspots.firstOrNull()
@@ -55,22 +71,28 @@ class HeatmapFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        val blackspots = DataRepository.getHeatmapOverview().blackspots
-
         spotIskcon.setOnClickListener {
-            blackspots.find { zone -> zone.id == "BS-01" }?.let { updateSelectedZone(it) }
+            val zone = activeBlackspots.find { it.id.contains("01") || it.name.contains("Iskcon", true) }
+                ?: activeBlackspots.getOrNull(0)
+            zone?.let { updateSelectedZone(it) }
         }
 
         spotVaishno.setOnClickListener {
-            blackspots.find { zone -> zone.id == "BS-02" }?.let { updateSelectedZone(it) }
+            val zone = activeBlackspots.find { it.id.contains("02") || it.name.contains("Vaishno", true) }
+                ?: activeBlackspots.getOrNull(1)
+            zone?.let { updateSelectedZone(it) }
         }
 
         spotChhatral.setOnClickListener {
-            blackspots.find { zone -> zone.id == "BS-03" }?.let { updateSelectedZone(it) }
+            val zone = activeBlackspots.find { it.id.contains("03") || it.name.contains("Chhatral", true) }
+                ?: activeBlackspots.getOrNull(2)
+            zone?.let { updateSelectedZone(it) }
         }
 
         spotSanand.setOnClickListener {
-            blackspots.find { zone -> zone.id == "BS-04" }?.let { updateSelectedZone(it) }
+            val zone = activeBlackspots.find { it.id.contains("04") || it.name.contains("Sanand", true) }
+                ?: activeBlackspots.getOrNull(3)
+            zone?.let { updateSelectedZone(it) }
         }
     }
 

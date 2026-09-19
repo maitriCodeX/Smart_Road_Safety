@@ -1,16 +1,22 @@
 package com.example.smartroadsafety
 
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var etActiveTunnel: EditText
+    private lateinit var btnApplyTunnel: AppCompatButton
 
     private lateinit var navItemRide: LinearLayout
     private lateinit var navItemHazards: LinearLayout
@@ -30,11 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvNavHeatmap: TextView
     private lateinit var tvNavProfile: TextView
 
-    private val rideFragment = RideFragment()
-    private val hazardsFragment = HazardsFragment()
-    private val driverScoreFragment = DriverScoreFragment()
-    private val heatmapFragment = HeatmapFragment()
-    private val profileFragment = ProfileFragment()
+    private var currentTabPosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +52,8 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setupBottomNav()
 
+        SafetyEngine.start(this)
+
         // "The first icon is for ride(by default this will be open once logged in)."
         if (savedInstanceState == null) {
             selectTab(0)
@@ -57,6 +61,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
+        etActiveTunnel = findViewById(R.id.etActiveTunnel)
+        btnApplyTunnel = findViewById(R.id.btnApplyTunnel)
+
+        etActiveTunnel.setText(SafetyEngine.getActiveTunnelName())
+        btnApplyTunnel.setOnClickListener {
+            val input = etActiveTunnel.text.toString().trim()
+            if (input.isNotBlank()) {
+                SafetyEngine.setTunnelName(input)
+                Toast.makeText(this, "Connected: ${SafetyEngine.resolveBaseUrl()}", Toast.LENGTH_SHORT).show()
+                selectTab(currentTabPosition)
+            }
+        }
+
         navItemRide = findViewById(R.id.navItemRide)
         navItemHazards = findViewById(R.id.navItemHazards)
         navItemScore = findViewById(R.id.navItemScore)
@@ -85,6 +102,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun selectTab(position: Int) {
+        currentTabPosition = position
         val selectedColor = getColor(R.color.nav_selected_tint)
         val unselectedColor = getColor(R.color.nav_unselected_tint)
 
@@ -108,29 +126,29 @@ class MainActivity : AppCompatActivity() {
             0 -> {
                 ivNavRide.setColorFilter(selectedColor)
                 tvNavRide.setTextColor(selectedColor)
-                rideFragment
+                RideFragment()
             }
             1 -> {
                 ivNavHazards.setColorFilter(selectedColor)
                 tvNavHazards.setTextColor(selectedColor)
-                hazardsFragment
+                HazardsFragment()
             }
             2 -> {
                 ivNavScore.setColorFilter(selectedColor)
                 tvNavScore.setTextColor(selectedColor)
-                driverScoreFragment
+                DriverScoreFragment()
             }
             3 -> {
                 ivNavHeatmap.setColorFilter(selectedColor)
                 tvNavHeatmap.setTextColor(selectedColor)
-                heatmapFragment
+                HeatmapFragment()
             }
             4 -> {
                 ivNavProfile.setColorFilter(selectedColor)
                 tvNavProfile.setTextColor(selectedColor)
-                profileFragment
+                ProfileFragment()
             }
-            else -> rideFragment
+            else -> RideFragment()
         }
 
         supportFragmentManager.beginTransaction()

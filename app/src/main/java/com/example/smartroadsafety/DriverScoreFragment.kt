@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.smartroadsafety.data.DataRepository
+import com.example.smartroadsafety.model.DriverScoreSummary
+import kotlinx.coroutines.launch
 
 class DriverScoreFragment : Fragment() {
 
@@ -45,7 +48,16 @@ class DriverScoreFragment : Fragment() {
     }
 
     private fun loadScoreData() {
-        val summary = DataRepository.getDriverScoreSummary()
+        renderScoreSummary(DataRepository.getDriverScoreSummary())
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val summary = DataRepository.fetchDriverScoreOnline()
+            renderScoreSummary(summary)
+        }
+    }
+
+    private fun renderScoreSummary(summary: DriverScoreSummary) {
+        if (!isAdded || context == null) return
 
         // Populate top rounded rectangle score
         tvOverallScoreNumber.text = summary.overallScore.toString()

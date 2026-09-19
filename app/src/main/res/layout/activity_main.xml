@@ -8,6 +8,56 @@
     android:background="@color/screen_bg"
     tools:context=".MainActivity">
 
+    <!-- Dynamic LocalTunnel Endpoint Bar -->
+    <LinearLayout
+        android:id="@+id/layoutTunnelBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/nav_bar_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="🌐 Tunnel"
+            android:textColor="@color/auth_card_bg"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etActiveTunnel"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_white_input"
+            android:hint="technexa-safety-2026"
+            android:imeOptions="actionDone"
+            android:inputType="textUri|textNoSuggestions"
+            android:paddingHorizontal="10dp"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnApplyTunnel"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_tab_selected"
+            android:minWidth="0dp"
+            android:paddingHorizontal="14dp"
+            android:text="Connect"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <!-- Container for dynamic screen fragments -->
     <FrameLayout
         android:id="@+id/fragmentContainer"
@@ -16,7 +66,7 @@
         app:layout_constraintBottom_toTopOf="@id/bottomNavCard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/layoutTunnelBar" />
 
     <!-- Rounded Corner Rectangle Navbar in 03071E -->
     <androidx.cardview.widget.CardView

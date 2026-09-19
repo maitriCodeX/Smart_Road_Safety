@@ -13,8 +13,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.smartroadsafety.data.DataRepository
 import com.example.smartroadsafety.model.NavigationAlert
+import kotlinx.coroutines.launch
 
 class RideFragment : Fragment() {
 
@@ -76,14 +78,24 @@ class RideFragment : Fragment() {
         val destinationText = if (dest.isEmpty()) "Mehsana Highway Bypass" else dest
         etDestination.setText(destinationText)
 
-        // Show navigation and alert instruction cards
+        // Show navigation and alert instruction cards immediately
         layoutAlertsContainer.visibility = View.VISIBLE
         tvActiveRouteTitle.text = "Navigation to $destinationText"
+        tvRouteEta.text = "Calculating ETA & hazards..."
 
-        val alerts = DataRepository.getAlertsForDestination(destinationText)
-        populateAlertCards(alerts)
+        val cachedAlerts = DataRepository.getAlertsForDestination(destinationText)
+        populateAlertCards(cachedAlerts)
 
-        Toast.makeText(requireContext(), "Navigation started! Hazard alerts loaded.", Toast.LENGTH_SHORT).show()
+        val lat = SafetyEngine.currentLat ?: 23.5269
+        val lon = SafetyEngine.currentLng ?: 72.4587
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val session = DataRepository.startRideOnline(destinationText, lat, lon)
+            tvActiveRouteTitle.text = "Navigation to ${session.destination}"
+            tvRouteEta.text = "${session.distanceKm} km • ${session.estimatedMins} min"
+            populateAlertCards(session.alerts)
+            Toast.makeText(requireContext(), "Navigation active! ${session.alerts.size} hazard alerts loaded.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun populateAlertCards(alerts: List<NavigationAlert>) {

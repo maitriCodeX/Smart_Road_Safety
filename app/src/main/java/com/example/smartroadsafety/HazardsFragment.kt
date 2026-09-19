@@ -10,9 +10,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.smartroadsafety.data.DataRepository
 import com.example.smartroadsafety.model.RouteHazard
 import com.example.smartroadsafety.model.TravelRoute
+import kotlinx.coroutines.launch
 
 class HazardsFragment : Fragment() {
 
@@ -54,8 +56,17 @@ class HazardsFragment : Fragment() {
     }
 
     private fun loadRoutes() {
+        renderRoutes(DataRepository.getFrequentlyTraveledRoutes())
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val routes = DataRepository.fetchFrequentRoutesOnline()
+            renderRoutes(routes)
+        }
+    }
+
+    private fun renderRoutes(routes: List<TravelRoute>) {
+        if (!isAdded || context == null) return
         llRoutesContainer.removeAllViews()
-        val routes = DataRepository.getFrequentlyTraveledRoutes()
         val inflater = LayoutInflater.from(requireContext())
 
         routes.forEach { route ->
@@ -69,7 +80,6 @@ class HazardsFragment : Fragment() {
             tvRouteSubInfo.text = "${route.origin} → ${route.destination} • ${route.totalDistanceKm} km • ${route.hazardsCount} hazards detected"
             tvTripCount.text = "${route.tripCount} trips"
 
-            // "On clicking the button it redirects to a page that shows individual hazards that are there on that route in card format"
             btnViewHazards.setOnClickListener {
                 showRouteHazards(route)
             }
@@ -83,12 +93,23 @@ class HazardsFragment : Fragment() {
         layoutHazardsDetail.visibility = View.VISIBLE
 
         tvDetailRouteTitle.text = route.title
-        tvDetailRouteSubtitle.text = "${route.hazards.size} hazards recorded on this route"
+        tvDetailRouteSubtitle.text = "Loading hazards for this corridor..."
+
+        renderHazards(route, DataRepository.getHazardsForRoute(route.routeId))
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val hazards = DataRepository.fetchRouteHazardsOnline(route.routeId)
+            renderHazards(route, hazards)
+        }
+    }
+
+    private fun renderHazards(route: TravelRoute, hazards: List<RouteHazard>) {
+        if (!isAdded || context == null) return
+        tvDetailRouteSubtitle.text = "${hazards.size} hazards recorded on this route"
 
         llRouteHazardsContainer.removeAllViews()
         val inflater = LayoutInflater.from(requireContext())
 
-        val hazards = DataRepository.getHazardsForRoute(route.routeId)
         hazards.forEach { hazard ->
             val cardView = inflater.inflate(R.layout.item_hazard_card, llRouteHazardsContainer, false)
             val tvHazardTitle = cardView.findViewById<TextView>(R.id.tvHazardTitle)

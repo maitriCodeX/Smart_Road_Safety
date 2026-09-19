@@ -10,8 +10,10 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.smartroadsafety.data.DataRepository
 import com.example.smartroadsafety.model.UserProfile
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
@@ -52,11 +54,23 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadProfileData() {
-        val profile = DataRepository.getUserProfile()
+        val cachedProfile = DataRepository.getUserProfile()
+        renderProfile(cachedProfile)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val liveProfile = DataRepository.fetchUserProfileOnline()
+            renderProfile(liveProfile)
+        }
+    }
+
+    private fun renderProfile(profile: UserProfile) {
+        if (!isAdded || context == null) return
         etProfileEmail.setText(profile.email)
         etProfilePassword.setText(profile.password)
         etProfilePhone.setText(profile.phoneNumber)
-        etProfileRelativePhone.setText(profile.relativePhoneNumber)
+        val emergencyPhone = SafetyEngine.getEmergencyTargetPhone()
+        val displayPhone = if (emergencyPhone.isNotBlank()) emergencyPhone else profile.relativePhoneNumber
+        etProfileRelativePhone.setText(displayPhone)
         etProfileAge.setText(profile.age.toString())
         etProfileBloodGroup.setText(profile.bloodGroup)
         etProfileCarPlate.setText(profile.carPlateNumber)
@@ -106,7 +120,17 @@ class ProfileFragment : Fragment() {
             carPlateNumber = carPlate
         )
 
-        DataRepository.updateUserProfile(updated)
-        Toast.makeText(requireContext(), "Profile changes saved successfully!", Toast.LENGTH_SHORT).show()
+        btnSaveProfile.isEnabled = false
+        btnSaveProfile.text = "Saving Profile..."
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val (success, message) = DataRepository.updateUserProfileOnline(updated)
+            btnSaveProfile.isEnabled = true
+            btnSaveProfile.text = "Save Profile"
+            if (relativePhone.isNotEmpty()) {
+                SafetyEngine.setEmergencyTargetPhone(relativePhone)
+            }
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
     }
 }

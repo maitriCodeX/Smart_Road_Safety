@@ -39,7 +39,11 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("org.nanohttpd:nanohttpd:2.3.1")
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.espressoCore)
     androidTestImplementation(libs.androidx.junit)
 }

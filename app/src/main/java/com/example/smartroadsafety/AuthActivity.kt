@@ -9,7 +9,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.lifecycle.lifecycleScope
 import com.example.smartroadsafety.data.DataRepository
+import kotlinx.coroutines.launch
 
 class AuthActivity : AppCompatActivity() {
 
@@ -33,12 +35,37 @@ class AuthActivity : AppCompatActivity() {
 
     private var isLoginMode = true
 
+    private val requiredPermissions = arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.SEND_SMS,
+        android.Manifest.permission.READ_PHONE_STATE,
+        android.Manifest.permission.RECEIVE_SMS,
+        android.Manifest.permission.READ_SMS
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
 
         initViews()
         setupListeners()
+        requestPermissionsIfNeeded()
+        SafetyEngine.start(this)
+    }
+
+    private fun requestPermissionsIfNeeded() {
+        val missing = requiredPermissions.filter {
+            androidx.core.content.ContextCompat.checkSelfPermission(this, it) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isNotEmpty()) {
+            androidx.core.app.ActivityCompat.requestPermissions(this, missing.toTypedArray(), 101)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        SafetyEngine.start(this)
     }
 
     private fun initViews() {
@@ -137,16 +164,25 @@ class AuthActivity : AppCompatActivity() {
             return
         }
 
-        // Save registration
-        DataRepository.register(name, email, password)
+        btnRegisterSubmit.isEnabled = false
+        btnRegisterSubmit.text = "Creating Account..."
 
-        Toast.makeText(this, "Registration successful! Please login.", Toast.LENGTH_LONG).show()
+        lifecycleScope.launch {
+            val (success, message) = DataRepository.registerOnline(name, email, password, confirmPassword)
+            btnRegisterSubmit.isEnabled = true
+            btnRegisterSubmit.text = "Create Account"
 
-        // Per requirements: "After user register themself they should be redirected to login and should login."
-        switchToLoginMode()
-        etLoginEmail.setText(email)
-        etLoginPassword.setText(password)
-        etLoginPassword.requestFocus()
+            if (success) {
+                Toast.makeText(this@AuthActivity, "$message Please login.", Toast.LENGTH_LONG).show()
+                // Per requirements: "After user register themself they should be redirected to login and should login."
+                switchToLoginMode()
+                etLoginEmail.setText(email)
+                etLoginPassword.setText(password)
+                etLoginPassword.requestFocus()
+            } else {
+                Toast.makeText(this@AuthActivity, message.ifEmpty { "Registration failed" }, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun handleLogin() {
@@ -165,14 +201,22 @@ class AuthActivity : AppCompatActivity() {
             return
         }
 
-        val success = DataRepository.login(email, password)
-        if (success) {
-            Toast.makeText(this, "Welcome to Smart Road Safety!", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        } else {
-            Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
+        btnLoginSubmit.isEnabled = false
+        btnLoginSubmit.text = "Signing In..."
+
+        lifecycleScope.launch {
+            val (success, message) = DataRepository.loginOnline(email, password)
+            btnLoginSubmit.isEnabled = true
+            btnLoginSubmit.text = "Sign In"
+
+            if (success) {
+                Toast.makeText(this@AuthActivity, message.ifEmpty { "Welcome to Smart Road Safety!" }, Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@AuthActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                Toast.makeText(this@AuthActivity, message.ifEmpty { "Invalid email or password" }, Toast.LENGTH_LONG).show()
+            }
         }
     }
 }
