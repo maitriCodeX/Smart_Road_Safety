@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="14dp"
+    app:cardBackgroundColor="@color/fine_card_bg"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_receipt"
+                app:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/tvTicketBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="FINE TICKET"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvTicketAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#33000000"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="₹1,000"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Reason for fine ticket (bg-9D0208, text-white) -->
+        <TextView
+            android:id="@+id/tvTicketReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Reason: Overspeeding > 80 km/h at SG Highway"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Date of fine ticket -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvTicketDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date: 18 Sep 2026, 04:15 PM"
+                android:textColor="#FFD8D8"
+                android:textSize="13sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvTicketStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Payable"
+                android:textColor="@color/auth_card_bg"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTicketLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="SG Highway Flyover near Vaishno Devi"
+            android:textColor="#FFB0B0"
+            android:textSize="11sp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

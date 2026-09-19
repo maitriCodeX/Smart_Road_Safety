@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core Brand Palette -->
+    <color name="auth_card_bg">#FFBA08</color>
+    <color name="nav_bar_bg">#03071E</color>
+    <color name="btn_start_ride_bg">#FAA307</color>
+    <color name="route_card_bg">#FAA307</color>
+    <color name="accent_orange">#FAA307</color>
+    <color name="hazard_btn_bg">#9D0208</color>
+    <color name="fine_card_bg">#9D0208</color>
+    <color name="hazard_red">#9D0208</color>
+
+    <!-- Fundamental Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Accent & Supporting Colors -->
+    <color name="screen_bg">#F4F6F9</color>
+    <color name="screen_bg_dark">#121624</color>
+    <color name="dark_surface">#1B2033</color>
+    <color name="dark_surface_light">#2A3048</color>
+    <color name="text_hint">#7E8597</color>
+    <color name="text_muted">#666666</color>
+    <color name="border_light">#E2E8F0</color>
+    <color name="divider">#EEEEEE</color>
+
+    <!-- Status & Alerts -->
+    <color name="status_safe">#2DC653</color>
+    <color name="status_warning">#FAA307</color>
+    <color name="status_danger">#D90429</color>
+    <color name="status_info">#3A86FF</color>
+
+    <!-- Selection & Highlights -->
+    <color name="nav_selected_tint">#FFBA08</color>
+    <color name="nav_unselected_tint">#8D99AE</color>
+</resources>

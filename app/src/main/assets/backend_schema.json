@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SmartRoadSafetyBackendContract",
+  "description": "Exhaustive JSON Schema and Contract of all fields required from the backend for the Smart Road Safety & Intelligent Telematics Android application.",
+  "type": "object",
+  "properties": {
+    "auth": {
+      "type": "object",
+      "description": "Authentication and user onboarding contracts",
+      "properties": {
+        "register_request": {
+          "type": "object",
+          "required": ["name", "email", "password", "confirm_password"],
+          "properties": {
+            "name": { "type": "string", "example": "Rahul Sharma", "description": "Full name of user" },
+            "email": { "type": "string", "format": "email", "example": "rahul.sharma@example.com", "description": "User email address" },
+            "password": { "type": "string", "format": "password", "example": "SecurePass@2026", "description": "User password" },
+            "confirm_password": { "type": "string", "format": "password", "example": "SecurePass@2026", "description": "Password confirmation" }
+          }
+        },
+        "login_request": {
+          "type": "object",
+          "required": ["email", "password"],
+          "properties": {
+            "email": { "type": "string", "format": "email", "example": "rahul.sharma@example.com", "description": "Registered email address" },
+            "password": { "type": "string", "format": "password", "example": "SecurePass@2026", "description": "User password" }
+          }
+        },
+        "auth_response": {
+          "type": "object",
+          "required": ["success", "token", "user"],
+          "properties": {
+            "success": { "type": "boolean", "example": true },
+            "message": { "type": "string", "example": "Authentication successful" },
+            "token": { "type": "string", "example": "jwt_token_header.payload.signature" },
+            "user": {
+              "type": "object",
+              "required": ["user_id", "name", "email"],
+              "properties": {
+                "user_id": { "type": "string", "example": "USR_98241" },
+                "name": { "type": "string", "example": "Rahul Sharma" },
+                "email": { "type": "string", "example": "rahul.sharma@example.com" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ride_navigation": {
+      "type": "object",
+      "description": "Ride start, destination search, and real-time navigation alerts",
+      "properties": {
+        "start_ride_request": {
+          "type": "object",
+          "required": ["destination", "current_lat", "current_lon"],
+          "properties": {
+            "destination": { "type": "string", "example": "Mehsana Highway Bypass" },
+            "current_lat": { "type": "number", "example": 23.2156 },
+            "current_lon": { "type": "number", "example": 72.6369 }
+          }
+        },
+        "navigation_alerts_response": {
+          "type": "object",
+          "required": ["destination", "distance_km", "estimated_time_mins", "alerts"],
+          "properties": {
+            "destination": { "type": "string", "example": "Mehsana Highway Bypass" },
+            "origin": { "type": "string", "example": "Infocity, Gandhinagar" },
+            "distance_km": { "type": "number", "example": 54.2 },
+            "estimated_time_mins": { "type": "integer", "example": 58 },
+            "alerts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["alert_id", "title", "instruction", "severity", "distance_ahead_m", "category"],
+                "properties": {
+                  "alert_id": { "type": "string", "example": "ALT-001" },
+                  "title": { "type": "string", "example": "Accident Prone Area Ahead" },
+                  "instruction": { "type": "string", "example": "Navigation and alert instruction: High crash zone near Vaishno Devi circle. Reduce speed to 35 km/h." },
+                  "severity": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"], "example": "HIGH" },
+                  "distance_ahead_m": { "type": "integer", "example": 350 },
+                  "category": { "type": "string", "enum": ["ACCIDENT_PRONE", "POTHOLE", "BLIND_CURVE", "SPEED_LIMIT", "NAVIGATION"], "example": "ACCIDENT_PRONE" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "hazards": {
+      "type": "object",
+      "description": "Frequently traveled routes and route-specific individual hazards",
+      "properties": {
+        "frequently_traveled_routes_response": {
+          "type": "array",
+          "description": "List of user's frequently traveled routes",
+          "items": {
+            "type": "object",
+            "required": ["route_id", "title", "origin", "destination", "trip_count", "total_hazards_count"],
+            "properties": {
+              "route_id": { "type": "string", "example": "ROUTE_GNR_MEH_01" },
+              "title": { "type": "string", "example": "Gandhinagar to Mehsana" },
+              "origin": { "type": "string", "example": "Gandhinagar CH Road" },
+              "destination": { "type": "string", "example": "Mehsana Highway Circle" },
+              "trip_count": { "type": "integer", "example": 28 },
+              "total_distance_km": { "type": "number", "example": 68.5 },
+              "total_hazards_count": { "type": "integer", "example": 6 }
+            }
+          }
+        },
+        "route_hazards_detail_response": {
+          "type": "object",
+          "description": "Detailed hazards listed for a specific selected route",
+          "required": ["route_id", "route_title", "hazards"],
+          "properties": {
+            "route_id": { "type": "string", "example": "ROUTE_GNR_MEH_01" },
+            "route_title": { "type": "string", "example": "Gandhinagar to Mehsana" },
+            "hazards": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["hazard_id", "hazard_type", "title", "nearby_location", "severity"],
+                "properties": {
+                  "hazard_id": { "type": "string", "example": "HAZ_001" },
+                  "hazard_type": { "type": "string", "enum": ["POTHOLE", "ACCIDENT_BLACKSPOT", "BLIND_CURVE", "WATER_LOGGING"], "example": "POTHOLE" },
+                  "title": { "type": "string", "example": "Severe Pothole Cluster" },
+                  "nearby_location": { "type": "string", "example": "Near: 50m past S-DMart, Kudasan Crossroad" },
+                  "description": { "type": "string", "example": "Multiple deep surface potholes across middle and right lanes detected by IMU jerk sensor" },
+                  "severity": { "type": "string", "enum": ["CRITICAL", "MODERATE", "LOW"], "example": "CRITICAL" },
+                  "lat": { "type": "number", "example": 23.1894 },
+                  "lon": { "type": "number", "example": 72.6281 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "driver_score": {
+      "type": "object",
+      "description": "Driver score actuarial breakdown and fine tickets",
+      "properties": {
+        "driver_score_response": {
+          "type": "object",
+          "required": ["overall_score", "actuarial_tier", "pillars", "fine_tickets"],
+          "properties": {
+            "overall_score": { "type": "integer", "minimum": 0, "maximum": 100, "example": 88 },
+            "actuarial_tier": { "type": "string", "enum": ["Platinum Safe", "Gold Standard", "Silver Moderate", "High Risk"], "example": "Platinum Safe" },
+            "insurance_discount_pct": { "type": "integer", "example": 25 },
+            "trend": { "type": "string", "enum": ["IMPROVING", "STABLE", "DECLINING"], "example": "IMPROVING" },
+            "pillars": {
+              "type": "object",
+              "required": ["smoothness_pct", "cornering_pct", "speed_compliance_pct", "vigilance_pct"],
+              "properties": {
+                "smoothness_pct": { "type": "integer", "example": 92 },
+                "cornering_pct": { "type": "integer", "example": 85 },
+                "speed_compliance_pct": { "type": "integer", "example": 88 },
+                "vigilance_pct": { "type": "integer", "example": 84 }
+              }
+            },
+            "fine_tickets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["ticket_id", "reason", "date", "amount", "status"],
+                "properties": {
+                  "ticket_id": { "type": "string", "example": "TCK-2026-901" },
+                  "reason": { "type": "string", "example": "Overspeeding > 80 km/h at SG Highway" },
+                  "date": { "type": "string", "example": "18 Sep 2026, 04:15 PM" },
+                  "amount": { "type": "string", "example": "₹1,000" },
+                  "amount_numeric": { "type": "number", "example": 1000.0 },
+                  "status": { "type": "string", "enum": ["UNPAID", "PAID", "DISPUTED"], "example": "UNPAID" },
+                  "location": { "type": "string", "example": "SG Highway Flyover near Vaishno Devi" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "heatmap": {
+      "type": "object",
+      "description": "High-density Gaussian thermal risk incidents and blackspots",
+      "properties": {
+        "heatmap_response": {
+          "type": "object",
+          "required": ["total_incidents", "weighted_points", "blackspot_zones"],
+          "properties": {
+            "total_incidents": { "type": "integer", "example": 132 },
+            "center_lat": { "type": "number", "example": 23.1124 },
+            "center_lon": { "type": "number", "example": 72.5489 },
+            "weighted_points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["lat", "lon", "weight"],
+                "properties": {
+                  "lat": { "type": "number", "example": 23.0298 },
+                  "lon": { "type": "number", "example": 72.5074 },
+                  "weight": { "type": "number", "minimum": 0.0, "maximum": 1.0, "example": 0.95 },
+                  "location_name": { "type": "string", "example": "Iskcon Crossroad" }
+                }
+              }
+            },
+            "blackspot_zones": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "name", "lat", "lon", "radius_m", "historical_crashes", "fatalities", "speed_limit_kmh"],
+                "properties": {
+                  "id": { "type": "string", "example": "BS-01" },
+                  "name": { "type": "string", "example": "Iskcon Crossroad Blackspot" },
+                  "lat": { "type": "number", "example": 23.0298 },
+                  "lon": { "type": "number", "example": 72.5074 },
+                  "radius_m": { "type": "number", "example": 250 },
+                  "color": { "type": "string", "example": "#9D0208" },
+                  "historical_crashes": { "type": "integer", "example": 42 },
+                  "fatalities": { "type": "integer", "example": 7 },
+                  "speed_limit_kmh": { "type": "integer", "example": 35 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "user_profile": {
+      "type": "object",
+      "description": "User profile, emergency contact, vehicle details, and modification schema",
+      "properties": {
+        "user_profile_response": {
+          "type": "object",
+          "required": ["user_id", "profile_picture_url", "email", "phone_number", "relative_phone_number", "age", "blood_group", "car_plate_number"],
+          "properties": {
+            "user_id": { "type": "string", "example": "USR_98241" },
+            "name": { "type": "string", "example": "Rahul Sharma" },
+            "profile_picture_url": { "type": "string", "format": "uri", "example": "https://images.example.com/profiles/rahul.jpg" },
+            "email": { "type": "string", "format": "email", "example": "rahul.sharma@example.com" },
+            "phone_number": { "type": "string", "example": "+91 98765 43210" },
+            "relative_phone_number": { "type": "string", "example": "+91 91234 56789", "description": "Primary emergency contact used for 20-second autonomous dead man's switch SOS SMS dispatch" },
+            "age": { "type": "integer", "example": 24 },
+            "blood_group": { "type": "string", "example": "B+" },
+            "car_plate_number": { "type": "string", "example": "GJ-01-AB-1234" }
+          }
+        },
+        "update_profile_request": {
+          "type": "object",
+          "required": ["email", "password", "phone_number", "relative_phone_number", "age", "blood_group", "car_plate_number"],
+          "properties": {
+            "profile_picture_base64": { "type": "string", "description": "Optional Base64-encoded profile picture image data" },
+            "email": { "type": "string", "format": "email", "example": "rahul.sharma@example.com" },
+            "password": { "type": "string", "example": "UpdatedSecurePass@2026" },
+            "phone_number": { "type": "string", "example": "+91 98765 43210" },
+            "relative_phone_number": { "type": "string", "example": "+91 91234 56789" },
+            "age": { "type": "integer", "example": 24 },
+            "blood_group": { "type": "string", "example": "B+" },
+            "car_plate_number": { "type": "string", "example": "GJ-01-AB-1234" }
+          }
+        }
+      }
+    }
+  }
+}

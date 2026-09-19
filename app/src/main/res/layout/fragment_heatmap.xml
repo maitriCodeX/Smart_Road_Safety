@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/screen_bg">
+
+    <!-- Card taking the rest of the page except bottom navbar with margin on each side -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardHeatmap"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="@color/dark_surface"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <!-- Heatmap Card Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_bottom_nav"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_nav_heatmap"
+                    app:tint="@color/auth_card_bg" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thermal Risk Heat Map"
+                        android:textColor="@color/white"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvHeatmapIncidentCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="132 Gaussian Mesh Incidents • Gujarat Region"
+                        android:textColor="#A0ABC0"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#2E1014"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:text="LIVE RADAR"
+                    android:textColor="@color/hazard_btn_bg"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Map Viewport / Visual Simulation Area -->
+            <FrameLayout
+                android:id="@+id/layoutHeatmapViewport"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
+                android:layout_weight="1"
+                android:background="#121624">
+
+                <!-- Grid overlay lines simulating digital map tile grid -->
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:alpha="0.25"
+                    android:src="@drawable/ic_launcher_background" />
+
+                <!-- Simulated Thermal Risk Clusters (Gaussian Heat spots) -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <!-- Cluster 1: Iskcon Crossroad (High Severity Red) -->
+                    <LinearLayout
+                        android:id="@+id/spotIskcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginStart="45dp"
+                        android:layout_marginTop="35dp"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:background="@drawable/bg_circle_avatar"
+                            android:backgroundTint="@color/fine_card_bg" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Iskcon (95%)"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Cluster 2: Vaishno Devi Circle -->
+                    <LinearLayout
+                        android:id="@+id/spotVaishno"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="50dp"
+                        android:layout_marginEnd="60dp"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:background="@drawable/bg_circle_avatar"
+                            android:backgroundTint="@color/route_card_bg" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Vaishno Devi"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Cluster 3: Chhatral GIDC Junction -->
+                    <LinearLayout
+                        android:id="@+id/spotChhatral"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="@drawable/bg_circle_avatar"
+                            android:backgroundTint="@color/fine_card_bg" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Chhatral GIDC (88%)"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Cluster 4: Sarkhej-Sanand Corridor -->
+                    <LinearLayout
+                        android:id="@+id/spotSanand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="60dp"
+                        android:layout_marginBottom="40dp"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_circle_avatar"
+                            android:backgroundTint="@color/route_card_bg" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Sanand Hub"
+                            android:textColor="@color/white"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Center Label overlay as shown in wireframe -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_margin="12dp"
+                        android:background="#66000000"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:text="HEAT MAP"
+                        android:textColor="@color/auth_card_bg"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+            </FrameLayout>
+
+            <!-- Bottom Information Panel for Selected Blackspot Zone -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#1A2035"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvBlackspotName"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Active Zone: Iskcon Crossroad Blackspot"
+                            android:textColor="@color/white"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSpeedLimitGeofence"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_btn_start_ride"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="2dp"
+                            android:text="Limit: 35 km/h"
+                            android:textColor="@color/black"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvBlackspotStats"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Historical Crashes: 42 • Fatalities: 7 • Danger Radius: 250m"
+                        android:textColor="#CBD5E1"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

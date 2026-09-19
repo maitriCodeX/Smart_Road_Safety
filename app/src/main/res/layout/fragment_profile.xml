@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/screen_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Screen Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:text="Edit Profile"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Profile Photo (Circular avatar at top center as in wireframe) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <FrameLayout
+                android:id="@+id/layoutAvatarContainer"
+                android:layout_width="100dp"
+                android:layout_height="100dp">
+
+                <ImageView
+                    android:id="@+id/ivProfileAvatar"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="@drawable/bg_circle_avatar"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_person"
+                    app:tint="@color/nav_bar_bg" />
+
+                <!-- Floating Edit Badge -->
+                <ImageView
+                    android:id="@+id/btnChangeAvatar"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/bg_bottom_nav"
+                    android:padding="7dp"
+                    android:src="@drawable/ic_camera"
+                    app:tint="@color/auth_card_bg" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Profile Photo"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Form Card / Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Field 1: Email -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Email"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etProfileEmail"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_white_input"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint"
+                android:textSize="14sp" />
+
+            <!-- Field 2: Password -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Password"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etProfilePassword"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_white_input"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint"
+                android:textSize="14sp" />
+
+            <!-- Field 3: Phone Number -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Phone number"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etProfilePhone"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_white_input"
+                android:hint="Phone number"
+                android:inputType="phone"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint"
+                android:textSize="14sp" />
+
+            <!-- Field 4: Relative Phone Number -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Relative phone number"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etProfileRelativePhone"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_white_input"
+                android:hint="Relative phone number (SOS Contact)"
+                android:inputType="phone"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint"
+                android:textSize="14sp" />
+
+            <!-- Field 5 & 6: Age and Blood Group (side-by-side row as shown in sketch) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:orientation="horizontal">
+
+                <!-- Age -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="Age"
+                        android:textColor="@color/black"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etProfileAge"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_white_input"
+                        android:gravity="center"
+                        android:hint="Age"
+                        android:inputType="number"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Blood Group -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="Blood group"
+                        android:textColor="@color/black"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/etProfileBloodGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_white_input"
+                        android:gravity="center"
+                        android:hint="Blood group"
+                        android:inputType="textCapCharacters"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Field 7: Carplate number -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Carplate number"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etProfileCarPlate"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_white_input"
+                android:hint="Carplate number (e.g. GJ-01-AB-1234)"
+                android:inputType="textCapCharacters"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint"
+                android:textSize="14sp" />
+
+            <!-- Save Button -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSaveProfile"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_btn_start_ride"
+                android:letterSpacing="0.04"
+                android:text="SAVE CHANGES"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
